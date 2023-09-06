@@ -13,14 +13,14 @@ function removeColorInput() {
 }
 
 function averageColors() {
-    let colors = Array.from(document.querySelectorAll('#colorInputs input')).map(input => input.value);
+    let colors = Array.from(document.querySelectorAll('#colorInputs input')).map(input => hexToRgb(input.value));
     
     let totalHue = 0;
     let totalSaturation = 0;
     let totalLightness = 0;
     
-    for (let color of colors) {
-        let [r, g, b] = rgbToHsl(color);
+    for (let [r, g, b] of colors) {
+        let [h, s, l] = rgbToHsl(r, g, b);
         totalHue += h;
         totalSaturation += s;
         totalLightness += l;
@@ -36,18 +36,6 @@ function averageColors() {
     fetchColorNameFromAPI(averageColor);
 }
 
-function fetchColorNameFromAPI(rgbColor) {
-    const cleanedRgb = rgbColor.replace("rgb(", "").replace(" ", "").replace(")", "").replace(/ /g, '');
-    const apiEndpoint = `https://www.thecolorapi.com/id?rgb=${cleanedRgb}&format=json`;
-    
-    fetch(apiEndpoint)
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('colorName').innerText = `Color Name: ${data.name.value}\nRGB: ${averageColor}\nHex: ${rgbToHex(averageColor)}`;
-    }).catch(error => {
-        console.error("Error fetching color name:", error);
-    });
-}
 
 
 function rgbToHsl(r, g, b){
