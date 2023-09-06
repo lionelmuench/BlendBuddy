@@ -18,8 +18,9 @@ function averageColors() {
     let totalHue = 0;
     let totalSaturation = 0;
     let totalLightness = 0;
-    for(let color of colors) {
-        let [h, s, l] = rgbToHsl(color);
+    
+    for (let color of colors) {
+        let [r, g, b] = rgbToHsl(color);
         totalHue += h;
         totalSaturation += s;
         totalLightness += l;
@@ -30,29 +31,20 @@ function averageColors() {
     let avgLightness = totalLightness / colors.length;
 
     let averageColor = hslToRgb(avgHue, avgSaturation, avgLightness);
-    document.body.style.backgroundColor = averageColor;
+    document.getElementById('result').style.backgroundColor = averageColor;
 
     fetchColorNameFromAPI(averageColor);
 }
 
 function fetchColorNameFromAPI(rgbColor) {
-    const apiEndpoint = `https://www.thecolorapi.com/id?rgb=${rgbColor.replace("rgb(", "").replace(")", "")}&format=json`;
+    const cleanedRgb = rgbColor.replace("rgb(", "").replace(" ", "").replace(")", "").replace(/ /g, '');
+    const apiEndpoint = `https://www.thecolorapi.com/id?rgb=${cleanedRgb}&format=json`;
     
     fetch(apiEndpoint)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.text();  // First, log as text to see the response.
-    })
-    .then(text => {
-        console.log(text);  // Log the response as text.
-        return JSON.parse(text);  // Now, try parsing it to JSON.
-    })
+    .then(response => response.json())
     .then(data => {
-        document.getElementById('colorName').innerText = `Color Name: ${data.name.value}\nRGB: ${rgbColor}\nHex: ${rgbToHex(rgbColor)}`;
-    })
-    .catch(error => {
+        document.getElementById('colorName').innerText = `Color Name: ${data.name.value}\nRGB: ${averageColor}\nHex: ${rgbToHex(averageColor)}`;
+    }).catch(error => {
         console.error("Error fetching color name:", error);
     });
 }
