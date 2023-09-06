@@ -39,13 +39,24 @@ function fetchColorNameFromAPI(rgbColor) {
     const apiEndpoint = `https://www.thecolorapi.com/id?rgb=${rgbColor.replace("rgb(", "").replace(")", "")}&format=json`;
     
     fetch(apiEndpoint)
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.text();  // First, log as text to see the response.
+    })
+    .then(text => {
+        console.log(text);  // Log the response as text.
+        return JSON.parse(text);  // Now, try parsing it to JSON.
+    })
     .then(data => {
-        document.getElementById('colorName').innerText = `Color Name: ${data.name.value}\nRGB: ${averageColor}\nHex: ${rgbToHex(averageColor)}`;
-    }).catch(error => {
+        document.getElementById('colorName').innerText = `Color Name: ${data.name.value}\nRGB: ${rgbColor}\nHex: ${rgbToHex(rgbColor)}`;
+    })
+    .catch(error => {
         console.error("Error fetching color name:", error);
     });
 }
+
 
 function rgbToHsl(r, g, b){
     r /= 255, g /= 255, b /= 255;
