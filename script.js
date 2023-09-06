@@ -13,14 +13,13 @@ function removeColorInput() {
 }
 
 function averageColors() {
-    let colors = Array.from(document.querySelectorAll('#colorInputs input')).map(input => hexToRgb(input.value));
+    let colors = Array.from(document.querySelectorAll('#colorInputs input')).map(input => input.value);
     
     let totalHue = 0;
     let totalSaturation = 0;
     let totalLightness = 0;
-    
-    for (let [r, g, b] of colors) {
-        let [h, s, l] = rgbToHsl(r, g, b);
+    for(let color of colors) {
+        let [h, s, l] = rgbToHsl(color);
         totalHue += h;
         totalSaturation += s;
         totalLightness += l;
@@ -31,7 +30,7 @@ function averageColors() {
     let avgLightness = totalLightness / colors.length;
 
     let averageColor = hslToRgb(avgHue, avgSaturation, avgLightness);
-    document.getElementById('result').style.backgroundColor = averageColor;
+    document.body.style.backgroundColor = averageColor;
 
     fetchColorNameFromAPI(averageColor);
 }
