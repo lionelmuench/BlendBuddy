@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlendBuddy</title>
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:300,400,500,700" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,10 +15,9 @@
             <input type="color" value="#FF0000">
         </div>
         <button onclick="addColorInput()">Add Friend</button>
+        <button onclick="removeColorInput()">Remove Friend</button>
         <button onclick="averageColors()">Blend Colors</button>
-        <div id="result" style="background-color: white;">
-            <p id="colorName">Color Name: </p>
-        </div>
+        <p id="colorName">Color Name: </p>
     </div>
     <script src="script.js"></script>
 </body>
