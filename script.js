@@ -1,3 +1,11 @@
+function hexToRgb(hex) {
+    let bigint = parseInt(hex.slice(1), 16);
+    let r = (bigint >> 16) & 255;
+    let g = (bigint >> 8) & 255;
+    let b = bigint & 255;
+    return [r, g, b];
+}
+
 function addColorInput() {
     const colorInput = document.createElement('input');
     colorInput.type = 'color';
@@ -5,21 +13,22 @@ function addColorInput() {
     document.getElementById('colorInputs').appendChild(colorInput);
 }
 
-function removeColorInput() {
-    const colorInputs = document.getElementById('colorInputs');
-    if(colorInputs.children.length > 1) { // Check to avoid removing the last color input
-        colorInputs.removeChild(colorInputs.lastChild);
+function removeLastColorInput() {
+    const colorInputsContainer = document.getElementById('colorInputs');
+    if(colorInputsContainer.children.length > 0) {
+        colorInputsContainer.removeChild(colorInputsContainer.lastChild);
     }
 }
 
 function averageColors() {
-    let colors = Array.from(document.querySelectorAll('#colorInputs input')).map(input => input.value);
+    let colors = Array.from(document.querySelectorAll('#colorInputs input')).map(input => hexToRgb(input.value));
     
     let totalHue = 0;
     let totalSaturation = 0;
     let totalLightness = 0;
-    for(let color of colors) {
-        let [h, s, l] = rgbToHsl(color);
+    
+    for (let [r, g, b] of colors) {
+        let [h, s, l] = rgbToHsl(r, g, b);
         totalHue += h;
         totalSaturation += s;
         totalLightness += l;
@@ -31,11 +40,22 @@ function averageColors() {
 
     let averageColor = hslToRgb(avgHue, avgSaturation, avgLightness);
     document.body.style.backgroundColor = averageColor;
+    document.getElementById('result').innerText = averageColor;
 
     fetchColorNameFromAPI(averageColor);
 }
 
-
+function fetchColorNameFromAPI(rgbColor) {
+    const apiEndpoint = `https://www.thecolorapi.com/id?rgb=${rgbColor.replace("rgb(", "").replace(" ", "").replace(")", "").replace(/ /g, '')}&format=json`;
+    
+    fetch(apiEndpoint)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('colorName').innerText = "Color Name: " + data.name.value;
+    }).catch(error => {
+        console.error("Error fetching color name:", error);
+    });
+}
 
 function rgbToHsl(r, g, b){
     r /= 255, g /= 255, b /= 255;
@@ -52,32 +72,26 @@ function rgbToHsl(r, g, b){
         }
         h /= 6;
     }
-    return [h * 360, s * 100, l * 100];
+    return [h, s, l];
 }
 
 function hslToRgb(h, s, l){
     let r, g, b;
     if(s === 0) r = g = b = l;
     else {
-        let hue2rgb = function hue2rgb(p, q, t){
+        function hue2rgb(p, q, t){
             if(t < 0) t += 1;
             if(t > 1) t -= 1;
             if(t < 1/6) return p + (q - p) * 6 * t;
             if(t < 1/2) return q;
             if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
             return p;
-        };
+        }
         let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
         let p = 2 * l - q;
         r = hue2rgb(p, q, h + 1/3);
         g = hue2rgb(p, q, h);
         b = hue2rgb(p, q, h - 1/3);
     }
-    return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)})`;
-}
-
-function rgbToHex(rgb) {
-    const regex = /(\d+),\s*(\d+),\s*(\d+)/;
-    const [, r, g, b] = rgb.match(regex).map(Number);
-    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+    return 'rgb(' + Math.round(r * 255) + ',' + Math.round(g * 255) + ',' + Math.round(b * 255) + ')';
 }
