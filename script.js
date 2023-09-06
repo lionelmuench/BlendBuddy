@@ -58,9 +58,8 @@ function fetchColorNameFromAPI(rgbColor) {
     fetch(apiEndpoint)
     .then(response => response.json())
     .then(data => {
-        const colorInfo = `
-            Color Name: ${data.name.value}
-            RGB: ${rgbColor}
+        const colorInfo = `Color Name: ${data.name.value}
+            ${rgbColor}
             HEX: ${data.hex.value}
         `;
         document.getElementById('colorName').innerText = colorInfo;
