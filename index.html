@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlendBuddy</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>BlendBuddy</h1>
+        <p>Find you and your friend's unique color!</p>
+        <div id="colorInputs">
+            <input type="color" value="#FF0000">
+        </div>
+        <button onclick="addColorInput()">Add Friend</button>
+        <button onclick="averageColors()">Blend Colors</button>
+        <div id="result" style="background-color: white;">
+            <p id="colorName">Color Name: </p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
