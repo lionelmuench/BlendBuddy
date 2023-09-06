@@ -22,19 +22,29 @@ function removeLastColorInput() {
 
 function averageColors() {
     let colors = Array.from(document.querySelectorAll('#colorInputs input')).map(input => hexToRgb(input.value));
-    
+
     let totalHue = 0;
     let totalSaturation = 0;
     let totalLightness = 0;
-    
+    let hues = [];
+
     for (let [r, g, b] of colors) {
         let [h, s, l] = rgbToHsl(r, g, b);
-        totalHue += h;
         totalSaturation += s;
         totalLightness += l;
+        hues.push(h);
     }
 
-    let avgHue = totalHue / colors.length;
+    let avgHue;
+    let avgHueAlt1 = hues.reduce((a, b) => a + b) / hues.length;
+    let avgHueAlt2 = (hues.reduce((a, b) => a + (b + 1)) / hues.length) % 1;
+
+    // Pick the hue average with the smallest total absolute difference to the input hues.
+    let diff1 = hues.reduce((acc, h) => acc + Math.abs(h - avgHueAlt1), 0);
+    let diff2 = hues.reduce((acc, h) => acc + Math.abs(h - avgHueAlt2), 0);
+
+    avgHue = diff1 < diff2 ? avgHueAlt1 : avgHueAlt2;
+    
     let avgSaturation = totalSaturation / colors.length;
     let avgLightness = totalLightness / colors.length;
 
@@ -51,11 +61,17 @@ function fetchColorNameFromAPI(rgbColor) {
     fetch(apiEndpoint)
     .then(response => response.json())
     .then(data => {
-        document.getElementById('colorName').innerText = "Color Name: " + data.name.value;
+        const colorInfo = `
+            Color Name: ${data.name.value}
+            RGB: ${rgbColor}
+            HEX: ${data.hex.value}
+        `;
+        document.getElementById('colorName').innerText = colorInfo;
     }).catch(error => {
-        console.error("Error fetching color name:", error);
+        console.error("Error fetching color details:", error);
     });
 }
+
 
 function rgbToHsl(r, g, b){
     r /= 255, g /= 255, b /= 255;
