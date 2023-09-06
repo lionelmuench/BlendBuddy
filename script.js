@@ -13,10 +13,10 @@ function addColorInput() {
     document.getElementById('colorInputs').appendChild(colorInput);
 }
 
-function removeLastColorInput() {
-    const colorInputsContainer = document.getElementById('colorInputs');
-    if(colorInputsContainer.children.length > 0) {
-        colorInputsContainer.removeChild(colorInputsContainer.lastChild);
+function removeColorInput() {
+    const colorInputsDiv = document.getElementById('colorInputs');
+    if (colorInputsDiv.childElementCount > 1) {
+        colorInputsDiv.removeChild(colorInputsDiv.lastChild);
     }
 }
 
@@ -26,38 +26,35 @@ function averageColors() {
     let totalHue = 0;
     let totalSaturation = 0;
     let totalLightness = 0;
-    let hues = [];
+    let hueValues = [];
 
     for (let [r, g, b] of colors) {
         let [h, s, l] = rgbToHsl(r, g, b);
+        hueValues.push(h);
         totalSaturation += s;
         totalLightness += l;
-        hues.push(h);
     }
 
-    let avgHue;
-    let avgHueAlt1 = hues.reduce((a, b) => a + b) / hues.length;
-    let avgHueAlt2 = (hues.reduce((a, b) => a + (b + 1)) / hues.length) % 1;
+    // Adjust hue values for wrap-around if necessary
+    if (Math.max(...hueValues) - Math.min(...hueValues) > 0.5) {
+        hueValues = hueValues.map(h => (h < 0.5) ? h + 1 : h);
+    }
 
-    // Pick the hue average with the smallest total absolute difference to the input hues.
-    let diff1 = hues.reduce((acc, h) => acc + Math.abs(h - avgHueAlt1), 0);
-    let diff2 = hues.reduce((acc, h) => acc + Math.abs(h - avgHueAlt2), 0);
+    totalHue = hueValues.reduce((a, b) => a + b, 0);
 
-    avgHue = diff1 < diff2 ? avgHueAlt1 : avgHueAlt2;
-    
+    let avgHue = totalHue / colors.length % 1;
     let avgSaturation = totalSaturation / colors.length;
     let avgLightness = totalLightness / colors.length;
 
     let averageColor = hslToRgb(avgHue, avgSaturation, avgLightness);
-    document.body.style.backgroundColor = averageColor;
-    document.getElementById('result').innerText = averageColor;
+    document.getElementById('result').style.backgroundColor = averageColor;
 
     fetchColorNameFromAPI(averageColor);
 }
 
 function fetchColorNameFromAPI(rgbColor) {
     const apiEndpoint = `https://www.thecolorapi.com/id?rgb=${rgbColor.replace("rgb(", "").replace(" ", "").replace(")", "").replace(/ /g, '')}&format=json`;
-    
+
     fetch(apiEndpoint)
     .then(response => response.json())
     .then(data => {
@@ -72,16 +69,15 @@ function fetchColorNameFromAPI(rgbColor) {
     });
 }
 
-
-function rgbToHsl(r, g, b){
+function rgbToHsl(r, g, b) {
     r /= 255, g /= 255, b /= 255;
     let max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h, s, l = (max + min) / 2;
-    if(max === min) h = s = 0;
+    if (max === min) h = s = 0;
     else {
         let d = max - min;
         s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-        switch(max){
+        switch (max) {
             case r: h = (g - b) / d + (g < b ? 6 : 0); break;
             case g: h = (b - r) / d + 2; break;
             case b: h = (r - g) / d + 4; break;
@@ -91,16 +87,16 @@ function rgbToHsl(r, g, b){
     return [h, s, l];
 }
 
-function hslToRgb(h, s, l){
+function hslToRgb(h, s, l) {
     let r, g, b;
-    if(s === 0) r = g = b = l;
+    if (s === 0) r = g = b = l;
     else {
-        function hue2rgb(p, q, t){
-            if(t < 0) t += 1;
-            if(t > 1) t -= 1;
-            if(t < 1/6) return p + (q - p) * 6 * t;
-            if(t < 1/2) return q;
-            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        function hue2rgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
             return p;
         }
         let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
@@ -111,3 +107,4 @@ function hslToRgb(h, s, l){
     }
     return 'rgb(' + Math.round(r * 255) + ',' + Math.round(g * 255) + ',' + Math.round(b * 255) + ')';
 }
+
